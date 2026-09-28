@@ -1,0 +1,123 @@
+2026-09-27 22:34:23 | WARNING  | src.collector | Chave duplicada na fonte da CVM (inconsistência da própria base, não é erro do coletor): 'K1'. Mantendo a versão mais confiável.
+2026-09-27 22:37:04 | WARNING  | src.collector | Chave duplicada na fonte da CVM (inconsistência da própria base, não é erro do coletor): 'K1'. Mantendo a versão mais confiável.
+2026-09-27 22:37:04 | INFO     | src.storage | Banco de dados inicializado em C:\Users\msouz\AppData\Local\Temp\tmp49kijt9u\test.db
+2026-09-27 22:37:04 | INFO     | src.comparator | Comparação concluída: 2 novos, 0 alterados, 0 inalterados.
+2026-09-27 22:37:04 | INFO     | src.storage | Banco de dados inicializado em C:\Users\msouz\AppData\Local\Temp\tmpcl0keclm\test.db
+2026-09-27 22:37:04 | INFO     | src.storage | Snapshot de 2024-01-01 salvo (1 registros).
+2026-09-27 22:37:04 | INFO     | src.comparator | Comparação concluída: 0 novos, 0 alterados, 1 inalterados.
+2026-09-27 22:37:04 | INFO     | src.storage | Banco de dados inicializado em C:\Users\msouz\AppData\Local\Temp\tmpkz1rvmpn\test.db
+2026-09-27 22:37:04 | INFO     | src.storage | Snapshot de 2024-01-01 salvo (1 registros).
+2026-09-27 22:37:04 | INFO     | src.comparator | Comparação concluída: 0 novos, 1 alterados, 0 inalterados.
+2026-09-27 22:37:04 | INFO     | src.storage | Banco de dados inicializado em C:\Users\msouz\AppData\Local\Temp\tmp95o4sz4p\test.db
+2026-09-27 22:37:04 | INFO     | src.storage | Snapshot de 2024-01-01 salvo (1 registros).
+2026-09-27 22:37:04 | INFO     | src.comparator | Comparação concluída: 1 novos, 0 alterados, 0 inalterados.
+2026-09-27 22:37:04 | INFO     | src.storage | Banco de dados inicializado em C:\Users\msouz\AppData\Local\Temp\tmp02hbvs3y\test.db
+2026-09-27 22:37:04 | INFO     | src.comparator | Comparação concluída: 1 novos, 0 alterados, 0 inalterados.
+2026-09-27 22:37:04 | INFO     | src.storage | Banco de dados inicializado em C:\Users\msouz\AppData\Local\Temp\tmpfv6d4kiv\test.db
+2026-09-27 22:37:04 | INFO     | src.storage | Snapshot de 2024-01-01 salvo (1 registros).
+2026-09-27 22:37:04 | INFO     | src.comparator | Comparação concluída: 0 novos, 1 alterados, 0 inalterados.
+2026-09-27 22:37:04 | INFO     | src.storage | Banco de dados inicializado em C:\Users\msouz\AppData\Local\Temp\tmpmmf93bj9\test.db
+2026-09-27 22:37:04 | INFO     | src.storage | Snapshot de 2024-01-01 salvo (1 registros).
+2026-09-27 22:37:04 | INFO     | src.storage | Snapshot de 2024-01-01 salvo (1 registros).
+2026-09-27 22:37:04 | INFO     | src.storage | Banco de dados inicializado em C:\Users\msouz\AppData\Local\Temp\tmpheu0zg8q\test.db
+2026-09-27 22:37:04 | INFO     | src.storage | Snapshot de 2024-01-01 salvo (2 registros).
+2026-09-27 22:37:04 | INFO     | src.storage | Banco de dados inicializado em C:\Users\msouz\AppData\Local\Temp\tmpbprhin0f\test.db
+2026-09-27 22:37:04 | INFO     | src.storage | 1 novos registros persistidos para 2024-02-01.
+2026-09-27 22:37:04 | INFO     | src.storage | Banco de dados inicializado em C:\Users\msouz\AppData\Local\Temp\tmpsi6e1hdy\test.db
+2026-09-27 22:37:04 | INFO     | src.storage | Snapshot de 2024-01-01 salvo (1 registros).
+2026-09-27 22:37:04 | INFO     | src.storage | Snapshot de 2024-02-01 salvo (1 registros).
+2026-09-27 22:37:59 | INFO     | __main__ | === Iniciando execução diária (2026-09-27) ===
+2026-09-27 22:37:59 | INFO     | src.storage | Banco de dados inicializado em C:\Users\msouz\Documents\cvm_monitor\data\cvm_monitor.db
+2026-09-27 22:37:59 | INFO     | src.collector | Baixando https://dados.cvm.gov.br/dados/ADM_CART/CAD/DADOS/cad_adm_cart.zip
+2026-09-27 22:38:00 | INFO     | src.collector | Download concluído: cad_adm_cart.zip (570294 bytes)
+2026-09-27 22:38:00 | INFO     | src.collector | Gestores coletados (filtrado por 'Gestor de Carteira'): 1959 PJ + 4723 PF = 6682 total (de 3053 PJ e 6838 PF no arquivo original, após deduplicação).
+2026-09-27 22:38:00 | INFO     | src.collector | Baixando https://dados.cvm.gov.br/dados/CONSULTOR_VLMOB/CAD/DADOS/cad_consultor_vlmob.zip
+2026-09-27 22:38:01 | INFO     | src.collector | Download concluído: cad_consultor_vlmob.zip (222611 bytes)
+2026-09-27 22:38:01 | WARNING  | src.collector | Chave duplicada na fonte da CVM (inconsistência da própria base, não é erro do coletor): '62.765.124/0001-15|2025-09-19|Consultoria'. Mantendo a versão mais confiável.
+2026-09-27 22:38:01 | WARNING  | src.collector | Chave duplicada na fonte da CVM (inconsistência da própria base, não é erro do coletor): '33.726.252/0001-51|2023-10-31|Consultoria'. Mantendo a versão mais confiável.
+2026-09-27 22:38:01 | WARNING  | src.collector | Chave duplicada na fonte da CVM (inconsistência da própria base, não é erro do coletor): '47.785.237/0001-99|2025-11-04|Consultoria'. Mantendo a versão mais confiável.
+2026-09-27 22:38:01 | WARNING  | src.collector | Chave duplicada na fonte da CVM (inconsistência da própria base, não é erro do coletor): '62.282.815/0001-68|2025-12-24|Consultoria'. Mantendo a versão mais confiável.
+2026-09-27 22:38:01 | WARNING  | src.collector | Chave duplicada na fonte da CVM (inconsistência da própria base, não é erro do coletor): '37.134.551/0001-58|2024-01-08|Consultoria'. Mantendo a versão mais confiável.
+2026-09-27 22:38:01 | WARNING  | src.collector | Chave duplicada na fonte da CVM (inconsistência da própria base, não é erro do coletor): '62.098.234/0001-70|2025-09-02|Consultoria'. Mantendo a versão mais confiável.
+2026-09-27 22:38:01 | WARNING  | src.collector | Chave duplicada na fonte da CVM (inconsistência da própria base, não é erro do coletor): '46.095.088/0001-73|2023-01-24|Consultoria'. Mantendo a versão mais confiável.
+2026-09-27 22:38:01 | WARNING  | src.collector | Chave duplicada na fonte da CVM (inconsistência da própria base, não é erro do coletor): 'BRUNO MOREIRA DE SOUZA BESSE|2026-07-13|Consultoria'. Mantendo a versão mais confiável.
+2026-09-27 22:38:01 | WARNING  | src.collector | Chave duplicada na fonte da CVM (inconsistência da própria base, não é erro do coletor): 'RONALDO PATAH|2007-07-05|Consultoria'. Mantendo a versão mais confiável.
+2026-09-27 22:38:01 | INFO     | src.collector | Consultorias coletadas: 1070 PJ + 3894 PF = 4955 total (após deduplicação).
+2026-09-27 22:38:01 | INFO     | src.comparator | Comparação concluída: 11637 novos, 0 alterados, 0 inalterados.
+2026-09-27 22:38:02 | INFO     | src.storage | Snapshot de 2026-09-27 salvo (11637 registros).
+2026-09-27 22:38:02 | INFO     | src.storage | 11637 novos registros persistidos para 2026-09-27.
+2026-09-27 22:38:02 | INFO     | src.report | Relatório salvo em C:\Users\msouz\Documents\cvm_monitor\data\reports\relatorio_2026-09-27.md
+2026-09-27 22:38:02 | INFO     | __main__ | Resumo do dia: 6682 novos gestores, 4955 novas consultorias, 0 alterações.
+2026-09-27 22:38:02 | INFO     | __main__ | === Execução diária concluída com sucesso ===
+2026-09-27 22:44:05 | INFO     | src.storage | Banco de dados inicializado em C:\Users\msouz\Documents\cvm_monitor\data\cvm_monitor.db
+2026-09-27 22:45:41 | INFO     | src.storage | Banco de dados inicializado em C:\Users\msouz\Documents\cvm_monitor\data\cvm_monitor.db
+2026-09-27 22:45:41 | INFO     | src.collector_mock | [MOCK] Coletando gestores (dados fictícios)...
+2026-09-27 22:45:41 | INFO     | src.collector_mock | [MOCK] Coleta concluída: 10 gestores.
+2026-09-27 22:45:41 | INFO     | src.collector_mock | [MOCK] Coletando consultorias (dados fictícios)...
+2026-09-27 22:45:41 | INFO     | src.collector_mock | [MOCK] Coleta concluída: 6 consultorias.
+2026-09-27 22:45:41 | INFO     | src.comparator | Comparação concluída: 16 novos, 0 alterados, 0 inalterados.
+2026-09-27 22:45:41 | INFO     | src.storage | Snapshot de 2026-09-27 salvo (16 registros).
+2026-09-27 22:45:41 | INFO     | src.storage | 16 novos registros persistidos para 2026-09-27.
+2026-09-27 22:45:41 | INFO     | src.report | Relatório salvo em C:\Users\msouz\Documents\cvm_monitor\data\reports\relatorio_2026-09-27.md
+2026-09-27 22:45:41 | INFO     | src.storage | Banco de dados inicializado em C:\Users\msouz\Documents\cvm_monitor\data\cvm_monitor.db
+2026-09-27 22:46:38 | INFO     | src.storage | Banco de dados inicializado em C:\Users\msouz\Documents\cvm_monitor\data\cvm_monitor.db
+2026-09-27 22:46:40 | INFO     | src.storage | Banco de dados inicializado em C:\Users\msouz\Documents\cvm_monitor\data\cvm_monitor.db
+2026-09-27 22:46:41 | INFO     | src.collector | Baixando https://dados.cvm.gov.br/dados/ADM_CART/CAD/DADOS/cad_adm_cart.zip
+2026-09-27 22:46:41 | INFO     | src.collector | Download concluído: cad_adm_cart.zip (570294 bytes)
+2026-09-27 22:46:42 | INFO     | src.collector | Gestores coletados (filtrado por 'Gestor de Carteira'): 1959 PJ + 4723 PF = 6682 total (de 3053 PJ e 6838 PF no arquivo original, após deduplicação).
+2026-09-27 22:46:42 | INFO     | src.collector | Baixando https://dados.cvm.gov.br/dados/CONSULTOR_VLMOB/CAD/DADOS/cad_consultor_vlmob.zip
+2026-09-27 22:46:43 | INFO     | src.collector | Download concluído: cad_consultor_vlmob.zip (222611 bytes)
+2026-09-27 22:46:43 | WARNING  | src.collector | Chave duplicada na fonte da CVM (inconsistência da própria base, não é erro do coletor): '62.765.124/0001-15|2025-09-19|Consultoria'. Mantendo a versão mais confiável.
+2026-09-27 22:46:43 | WARNING  | src.collector | Chave duplicada na fonte da CVM (inconsistência da própria base, não é erro do coletor): '33.726.252/0001-51|2023-10-31|Consultoria'. Mantendo a versão mais confiável.
+2026-09-27 22:46:43 | WARNING  | src.collector | Chave duplicada na fonte da CVM (inconsistência da própria base, não é erro do coletor): '47.785.237/0001-99|2025-11-04|Consultoria'. Mantendo a versão mais confiável.
+2026-09-27 22:46:43 | WARNING  | src.collector | Chave duplicada na fonte da CVM (inconsistência da própria base, não é erro do coletor): '62.282.815/0001-68|2025-12-24|Consultoria'. Mantendo a versão mais confiável.
+2026-09-27 22:46:43 | WARNING  | src.collector | Chave duplicada na fonte da CVM (inconsistência da própria base, não é erro do coletor): '37.134.551/0001-58|2024-01-08|Consultoria'. Mantendo a versão mais confiável.
+2026-09-27 22:46:43 | WARNING  | src.collector | Chave duplicada na fonte da CVM (inconsistência da própria base, não é erro do coletor): '62.098.234/0001-70|2025-09-02|Consultoria'. Mantendo a versão mais confiável.
+2026-09-27 22:46:43 | WARNING  | src.collector | Chave duplicada na fonte da CVM (inconsistência da própria base, não é erro do coletor): '46.095.088/0001-73|2023-01-24|Consultoria'. Mantendo a versão mais confiável.
+2026-09-27 22:46:43 | WARNING  | src.collector | Chave duplicada na fonte da CVM (inconsistência da própria base, não é erro do coletor): 'BRUNO MOREIRA DE SOUZA BESSE|2026-07-13|Consultoria'. Mantendo a versão mais confiável.
+2026-09-27 22:46:43 | WARNING  | src.collector | Chave duplicada na fonte da CVM (inconsistência da própria base, não é erro do coletor): 'RONALDO PATAH|2007-07-05|Consultoria'. Mantendo a versão mais confiável.
+2026-09-27 22:46:43 | INFO     | src.collector | Consultorias coletadas: 1070 PJ + 3894 PF = 4955 total (após deduplicação).
+2026-09-27 22:46:58 | INFO     | src.comparator | Comparação concluída: 0 novos, 0 alterados, 11637 inalterados.
+2026-09-27 22:46:58 | INFO     | src.storage | Snapshot de 2026-09-27 salvo (11637 registros).
+2026-09-27 22:46:58 | INFO     | src.report | Relatório salvo em C:\Users\msouz\Documents\cvm_monitor\data\reports\relatorio_2026-09-27.md
+2026-09-27 22:46:58 | INFO     | src.storage | Banco de dados inicializado em C:\Users\msouz\Documents\cvm_monitor\data\cvm_monitor.db
+2026-09-27 22:59:45 | INFO     | src.storage | Banco de dados inicializado em C:\Users\msouz\Documents\cvm_monitor\data\cvm_monitor.db
+2026-09-27 22:59:55 | INFO     | src.storage | Banco de dados inicializado em C:\Users\msouz\Documents\cvm_monitor\data\cvm_monitor.db
+2026-09-27 22:59:58 | INFO     | src.storage | Banco de dados inicializado em C:\Users\msouz\Documents\cvm_monitor\data\cvm_monitor.db
+2026-09-27 22:59:58 | INFO     | src.collector_mock | [MOCK] Coletando gestores (dados fictícios)...
+2026-09-27 22:59:58 | INFO     | src.collector_mock | [MOCK] Coleta concluída: 10 gestores.
+2026-09-27 22:59:58 | INFO     | src.collector_mock | [MOCK] Coletando consultorias (dados fictícios)...
+2026-09-27 22:59:58 | INFO     | src.collector_mock | [MOCK] Coleta concluída: 9 consultorias.
+2026-09-27 22:59:58 | INFO     | src.comparator | Comparação concluída: 3 novos, 0 alterados, 16 inalterados.
+2026-09-27 22:59:58 | INFO     | src.storage | Snapshot de 2026-09-27 salvo (19 registros).
+2026-09-27 22:59:58 | INFO     | src.storage | 3 novos registros persistidos para 2026-09-27.
+2026-09-27 22:59:58 | INFO     | src.report | Relatório salvo em C:\Users\msouz\Documents\cvm_monitor\data\reports\relatorio_2026-09-27.md
+2026-09-27 22:59:58 | INFO     | src.storage | Banco de dados inicializado em C:\Users\msouz\Documents\cvm_monitor\data\cvm_monitor.db
+2026-09-27 22:59:59 | INFO     | src.storage | Banco de dados inicializado em C:\Users\msouz\Documents\cvm_monitor\data\cvm_monitor.db
+2026-09-27 22:59:59 | INFO     | src.collector_mock | [MOCK] Coletando gestores (dados fictícios)...
+2026-09-27 22:59:59 | INFO     | src.collector_mock | [MOCK] Coleta concluída: 10 gestores.
+2026-09-27 22:59:59 | INFO     | src.collector_mock | [MOCK] Coletando consultorias (dados fictícios)...
+2026-09-27 22:59:59 | INFO     | src.collector_mock | [MOCK] Coleta concluída: 9 consultorias.
+2026-09-27 22:59:59 | INFO     | src.comparator | Comparação concluída: 0 novos, 0 alterados, 19 inalterados.
+2026-09-27 22:59:59 | INFO     | src.storage | Snapshot de 2026-09-27 salvo (19 registros).
+2026-09-27 22:59:59 | INFO     | src.report | Relatório salvo em C:\Users\msouz\Documents\cvm_monitor\data\reports\relatorio_2026-09-27.md
+2026-09-27 22:59:59 | INFO     | src.storage | Banco de dados inicializado em C:\Users\msouz\Documents\cvm_monitor\data\cvm_monitor.db
+2026-09-27 23:00:03 | INFO     | src.storage | Banco de dados inicializado em C:\Users\msouz\Documents\cvm_monitor\data\cvm_monitor.db
+2026-09-27 23:00:03 | INFO     | src.collector_mock | [MOCK] Coletando gestores (dados fictícios)...
+2026-09-27 23:00:03 | INFO     | src.collector_mock | [MOCK] Coleta concluída: 10 gestores.
+2026-09-27 23:00:03 | INFO     | src.collector_mock | [MOCK] Coletando consultorias (dados fictícios)...
+2026-09-27 23:00:03 | INFO     | src.collector_mock | [MOCK] Coleta concluída: 9 consultorias.
+2026-09-27 23:00:03 | INFO     | src.comparator | Comparação concluída: 0 novos, 0 alterados, 19 inalterados.
+2026-09-27 23:00:03 | INFO     | src.storage | Snapshot de 2026-09-27 salvo (19 registros).
+2026-09-27 23:00:03 | INFO     | src.report | Relatório salvo em C:\Users\msouz\Documents\cvm_monitor\data\reports\relatorio_2026-09-27.md
+2026-09-27 23:00:03 | INFO     | src.storage | Banco de dados inicializado em C:\Users\msouz\Documents\cvm_monitor\data\cvm_monitor.db
+2026-09-27 23:00:03 | INFO     | src.storage | Banco de dados inicializado em C:\Users\msouz\Documents\cvm_monitor\data\cvm_monitor.db
+2026-09-27 23:00:04 | INFO     | src.collector_mock | [MOCK] Coletando gestores (dados fictícios)...
+2026-09-27 23:00:04 | INFO     | src.collector_mock | [MOCK] Coleta concluída: 10 gestores.
+2026-09-27 23:00:04 | INFO     | src.collector_mock | [MOCK] Coletando consultorias (dados fictícios)...
+2026-09-27 23:00:04 | INFO     | src.collector_mock | [MOCK] Coleta concluída: 9 consultorias.
+2026-09-27 23:00:04 | INFO     | src.comparator | Comparação concluída: 0 novos, 0 alterados, 19 inalterados.
+2026-09-27 23:00:04 | INFO     | src.storage | Snapshot de 2026-09-27 salvo (19 registros).
+2026-09-27 23:00:04 | INFO     | src.report | Relatório salvo em C:\Users\msouz\Documents\cvm_monitor\data\reports\relatorio_2026-09-27.md
+2026-09-27 23:00:04 | INFO     | src.storage | Banco de dados inicializado em C:\Users\msouz\Documents\cvm_monitor\data\cvm_monitor.db
+2026-09-27 23:00:21 | INFO     | src.storage | Banco de dados inicializado em C:\Users\msouz\Documents\cvm_monitor\data\cvm_monitor.db
