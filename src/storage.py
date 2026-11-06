@@ -1,67 +1,95 @@
 """
-Camada de armazenamento histórico.
+Camada de armazenamento (SQLite, arquivo único em data/monitor.db).
 
-Usa SQLite (arquivo único, zero setup) para guardar, para cada execução:
-  - um snapshot completo do que foi coletado naquele dia (tabela `snapshots`)
-  - os registros marcados como "novos" naquele dia (tabela `novos_registros`)
+Modelo — uma linha por entidade, não uma foto por dia:
 
-A chave de identidade de uma entidade é `chave_unica` = identificador +
-"|" + data_registro, onde identificador é o CNPJ (pessoa jurídica) ou o
-NOME (pessoa física — a CVM não disponibiliza CPF nos dados abertos).
+  entidades   dados da CVM + primeira_deteccao (data em que o monitor viu a
+              entidade pela 1ª vez) + baseline (1 = já existia na carga inicial,
+              logo NÃO conta como "novo detectado")
+  cargas      log de cada atualização (data, totais, status ok/erro)
+  alteracoes  histórico de mudanças (nome, situação, contato)
+  leads       dados COMERCIAIS internos (status, responsável, observações),
+              separados dos dados oficiais da CVM e nunca sobrescritos por
+              uma nova carga.
 
-Por que uma chave composta e não só o identificador? Porque o arquivo da
-CVM é um histórico completo (inclui cancelados), e uma mesma empresa/pessoa
-pode se recadastrar depois de cancelar — nesse caso ela ganha uma nova
-data de registro. Tratar isso como "novo" é o comportamento correto do
-ponto de vista de negócio (ver src/collector.py para o caso real que
-motivou essa decisão).
+Dois conceitos de data, como no briefing:
+  data_registro      -> data do registro na CVM (fonte)
+  primeira_deteccao  -> data em que o monitor detectou a entidade
 """
 import sqlite3
 from contextlib import contextmanager
-from datetime import date
+from datetime import datetime
 
+import pandas as pd
+
+from src.collector import CAMPOS
 from src.config import DB_PATH
 from src.logger_config import get_logger
 
 logger = get_logger(__name__)
 
-SCHEMA = """
-CREATE TABLE IF NOT EXISTS snapshots (
+
+def _definicao_entidades() -> str:
+    colunas = []
+    for c in CAMPOS:
+        if c == "chave_unica":
+            colunas.append("chave_unica TEXT PRIMARY KEY")
+        elif c == "patrimonio_liquido":
+            colunas.append("patrimonio_liquido REAL")
+        elif c in ("tipo", "pessoa", "nome"):
+            colunas.append(f"{c} TEXT NOT NULL")
+        else:
+            colunas.append(f"{c} TEXT")
+    colunas += [
+        "primeira_deteccao TEXT NOT NULL",
+        "ultima_vista TEXT NOT NULL",
+        "baseline INTEGER NOT NULL DEFAULT 0",
+        "ativo_na_fonte INTEGER NOT NULL DEFAULT 1",
+    ]
+    return ",\n    ".join(colunas)
+
+
+SCHEMA = f"""
+CREATE TABLE IF NOT EXISTS entidades (
+    {_definicao_entidades()}
+);
+CREATE INDEX IF NOT EXISTS idx_entidades_registro ON entidades(data_registro);
+CREATE INDEX IF NOT EXISTS idx_entidades_deteccao ON entidades(primeira_deteccao);
+
+CREATE TABLE IF NOT EXISTS cargas (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    data_coleta TEXT NOT NULL,
-    chave_unica TEXT NOT NULL,
-    tipo TEXT NOT NULL,
-    pessoa TEXT NOT NULL,
-    nome TEXT NOT NULL,
-    cnpj TEXT,
-    situacao TEXT,
-    data_registro TEXT,
-    UNIQUE(data_coleta, chave_unica)
+    data_carga TEXT NOT NULL,
+    iniciada_em TEXT NOT NULL,
+    total INTEGER DEFAULT 0,
+    novos INTEGER DEFAULT 0,
+    alterados INTEGER DEFAULT 0,
+    removidos INTEGER DEFAULT 0,
+    baseline INTEGER DEFAULT 0,
+    status TEXT NOT NULL,
+    mensagem TEXT
 );
 
-CREATE TABLE IF NOT EXISTS novos_registros (
+CREATE TABLE IF NOT EXISTS alteracoes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    data_deteccao TEXT NOT NULL,
+    data TEXT NOT NULL,
     chave_unica TEXT NOT NULL,
-    tipo TEXT NOT NULL,
-    pessoa TEXT NOT NULL,
-    nome TEXT NOT NULL,
-    cnpj TEXT,
-    situacao TEXT,
-    data_registro TEXT
+    campo TEXT NOT NULL,
+    valor_anterior TEXT,
+    valor_novo TEXT
 );
 
-CREATE TABLE IF NOT EXISTS registros_injetados_demo (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    chave_unica TEXT NOT NULL,
-    tipo TEXT NOT NULL,
-    pessoa TEXT NOT NULL,
-    nome TEXT NOT NULL,
-    cnpj TEXT,
-    situacao TEXT,
-    data_registro TEXT
+CREATE TABLE IF NOT EXISTS leads (
+    chave_unica TEXT PRIMARY KEY,
+    status TEXT,
+    owner TEXT,
+    linkedin TEXT,
+    contato_extra TEXT,
+    observacoes TEXT,
+    atualizado_em TEXT
 );
 """
+
+CAMPOS_COMPARACAO = ["nome", "situacao", "uf", "municipio", "email", "site", "telefone", "ativo_na_fonte"]
 
 
 @contextmanager
@@ -78,155 +106,153 @@ def get_conn():
 def init_db() -> None:
     with get_conn() as conn:
         conn.executescript(SCHEMA)
-    logger.info("Banco de dados inicializado em %s", DB_PATH)
 
 
-def save_snapshot(records: list[dict], data_coleta: str | None = None) -> None:
-    """Salva o snapshot do dia. Usa INSERT OR IGNORE para não duplicar
-    caso a coleta seja rodada mais de uma vez no mesmo dia."""
-    data_coleta = data_coleta or date.today().isoformat()
+# ----------------------------------------------------------------------------
+# Cargas
+# ----------------------------------------------------------------------------
+def has_baseline() -> bool:
+    """True se já existe ao menos uma carga concluída (a base de comparação)."""
     with get_conn() as conn:
-        for r in records:
-            conn.execute(
-                """
-                INSERT OR IGNORE INTO snapshots
-                    (data_coleta, chave_unica, tipo, pessoa, nome, cnpj, situacao, data_registro)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    data_coleta,
-                    r["chave_unica"],
-                    r["tipo"],
-                    r["pessoa"],
-                    r["nome"],
-                    r.get("cnpj"),
-                    r.get("situacao"),
-                    r.get("data_registro"),
-                ),
+        return conn.execute("SELECT 1 FROM cargas WHERE status = 'ok' LIMIT 1").fetchone() is not None
+
+
+def load_existing() -> dict[str, dict]:
+    """Campos de comparação de todas as entidades conhecidas, por chave."""
+    colunas = ", ".join(["chave_unica"] + CAMPOS_COMPARACAO)
+    with get_conn() as conn:
+        rows = conn.execute(f"SELECT {colunas} FROM entidades").fetchall()
+    return {r["chave_unica"]: dict(r) for r in rows}
+
+
+def apply_carga(result, data_carga: str, iniciada_em: str) -> None:
+    """
+    Grava o resultado de uma comparação em uma única transação:
+    upsert de todas as entidades (preserva primeira_deteccao e baseline das
+    que já existiam), histórico de alterações, ausentes da fonte e log da carga.
+    """
+    colunas = CAMPOS + ["primeira_deteccao", "ultima_vista", "baseline", "ativo_na_fonte"]
+    atualizaveis = [c for c in CAMPOS if c != "chave_unica"]
+    set_clause = ", ".join(f"{c} = excluded.{c}" for c in atualizaveis)
+    sql = (
+        f"INSERT INTO entidades ({', '.join(colunas)}) VALUES ({', '.join('?' * len(colunas))}) "
+        f"ON CONFLICT(chave_unica) DO UPDATE SET {set_clause}, "
+        f"ultima_vista = excluded.ultima_vista, ativo_na_fonte = 1"
+    )
+    flag_baseline = 1 if result.baseline else 0
+    linhas = [
+        tuple(r.get(c) for c in CAMPOS) + (data_carga, data_carga, flag_baseline, 1)
+        for r in result.registros
+    ]
+    historico = [
+        (data_carga, r["chave_unica"], campo, antes, depois)
+        for r in result.alterados
+        for campo, antes, depois in r["mudancas"]
+    ]
+
+    with get_conn() as conn:
+        conn.executemany(sql, linhas)
+        if historico:
+            conn.executemany(
+                "INSERT INTO alteracoes (data, chave_unica, campo, valor_anterior, valor_novo) VALUES (?,?,?,?,?)",
+                historico,
             )
-    logger.info("Snapshot de %s salvo (%d registros).", data_coleta, len(records))
-
-
-def get_all_known_chaves(before_date: str | None = None) -> set[str]:
-    """Retorna o conjunto de chaves únicas já vistas em QUALQUER snapshot
-    anterior. É essa a base para decidir se um registro é 'novo'."""
-    query = "SELECT DISTINCT chave_unica FROM snapshots"
-    params = ()
-    if before_date:
-        query += " WHERE data_coleta < ?"
-        params = (before_date,)
-    with get_conn() as conn:
-        rows = conn.execute(query, params).fetchall()
-    return {row["chave_unica"] for row in rows}
-
-
-def get_latest_snapshot_by_chave(chave_unica: str) -> dict | None:
-    """Retorna o registro mais recente conhecido para uma dada chave única
-    (usado para detectar alteração de nome/situação sem confundir com 'novo')."""
-    with get_conn() as conn:
-        row = conn.execute(
-            """
-            SELECT * FROM snapshots
-            WHERE chave_unica = ?
-            ORDER BY data_coleta DESC
-            LIMIT 1
-            """,
-            (chave_unica,),
-        ).fetchone()
-    return dict(row) if row else None
-
-
-def save_new_records(records: list[dict], data_deteccao: str | None = None) -> None:
-    data_deteccao = data_deteccao or date.today().isoformat()
-    with get_conn() as conn:
-        for r in records:
+        for i in range(0, len(result.removidos), 500):
+            lote = result.removidos[i:i + 500]
             conn.execute(
-                """
-                INSERT INTO novos_registros
-                    (data_deteccao, chave_unica, tipo, pessoa, nome, cnpj, situacao, data_registro)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    data_deteccao,
-                    r["chave_unica"],
-                    r["tipo"],
-                    r["pessoa"],
-                    r["nome"],
-                    r.get("cnpj"),
-                    r.get("situacao"),
-                    r.get("data_registro"),
-                ),
+                f"UPDATE entidades SET ativo_na_fonte = 0 WHERE chave_unica IN ({', '.join('?' * len(lote))})",
+                lote,
             )
-    logger.info("%d novos registros persistidos para %s.", len(records), data_deteccao)
+        conn.execute(
+            "INSERT INTO cargas (data_carga, iniciada_em, total, novos, alterados, removidos, baseline, status) "
+            "VALUES (?,?,?,?,?,?,?, 'ok')",
+            (data_carga, iniciada_em, len(result.registros), len(result.novos),
+             len(result.alterados), len(result.removidos), flag_baseline),
+        )
+    logger.info("Carga de %s gravada: %d entidades (%d novas).", data_carga, len(linhas), len(result.novos))
 
 
-def get_new_records_by_date(data: str) -> list[dict]:
-    with get_conn() as conn:
-        rows = conn.execute(
-            "SELECT * FROM novos_registros WHERE data_deteccao = ?", (data,)
-        ).fetchall()
-    return [dict(r) for r in rows]
-
-
-def get_history_dates() -> list[str]:
-    with get_conn() as conn:
-        rows = conn.execute(
-            "SELECT DISTINCT data_deteccao FROM novos_registros ORDER BY data_deteccao DESC"
-        ).fetchall()
-    return [r["data_deteccao"] for r in rows]
-
-
-def get_totals() -> dict:
-    with get_conn() as conn:
-        latest_date_row = conn.execute(
-            "SELECT MAX(data_coleta) as d FROM snapshots"
-        ).fetchone()
-        latest_date = latest_date_row["d"]
-        if not latest_date:
-            return {"gestores": 0, "consultorias": 0, "ultima_atualizacao": None}
-        gestores = conn.execute(
-            "SELECT COUNT(DISTINCT chave_unica) c FROM snapshots WHERE tipo='Gestor'"
-        ).fetchone()["c"]
-        consultorias = conn.execute(
-            "SELECT COUNT(DISTINCT chave_unica) c FROM snapshots WHERE tipo='Consultoria'"
-        ).fetchone()["c"]
-    return {
-        "gestores": gestores,
-        "consultorias": consultorias,
-        "ultima_atualizacao": latest_date,
-    }
-
-
-# ---------------------------------------------------------------------------
-# Utilitário exclusivo do MODO DEMO (mock) — permite injetar registros
-# fictícios para simular a chegada de novos cadastros no dia seguinte.
-# ---------------------------------------------------------------------------
-def add_injected_record(record: dict) -> None:
+def log_carga_erro(data_carga: str, iniciada_em: str, mensagem: str) -> None:
     with get_conn() as conn:
         conn.execute(
-            """
-            INSERT INTO registros_injetados_demo
-                (chave_unica, tipo, pessoa, nome, cnpj, situacao, data_registro)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-            """,
-            (
-                record["chave_unica"],
-                record["tipo"],
-                record.get("pessoa", "PJ"),
-                record["nome"],
-                record.get("cnpj"),
-                record.get("situacao", "EM FUNCIONAMENTO NORMAL"),
-                record.get("data_registro"),
-            ),
+            "INSERT INTO cargas (data_carga, iniciada_em, status, mensagem) VALUES (?,?, 'erro', ?)",
+            (data_carga, iniciada_em, mensagem[:500]),
         )
 
 
-def get_injected_records() -> list[dict]:
+def last_carga() -> dict | None:
+    """Última tentativa de carga (ok ou erro)."""
     with get_conn() as conn:
-        rows = conn.execute("SELECT * FROM registros_injetados_demo").fetchall()
-    return [dict(r) for r in rows]
+        row = conn.execute("SELECT * FROM cargas ORDER BY id DESC LIMIT 1").fetchone()
+    return dict(row) if row else None
 
 
-def clear_injected_records() -> None:
+def last_ok_carga() -> dict | None:
     with get_conn() as conn:
-        conn.execute("DELETE FROM registros_injetados_demo")
+        row = conn.execute("SELECT * FROM cargas WHERE status = 'ok' ORDER BY id DESC LIMIT 1").fetchone()
+    return dict(row) if row else None
+
+
+def get_cargas(limite: int = 30) -> pd.DataFrame:
+    with get_conn() as conn:
+        return pd.read_sql_query("SELECT * FROM cargas ORDER BY id DESC LIMIT ?", conn, params=(limite,))
+
+
+def get_alteracoes(limite: int = 200) -> pd.DataFrame:
+    sql = (
+        "SELECT a.data, e.tipo, e.pessoa, e.nome, a.campo, a.valor_anterior, a.valor_novo "
+        "FROM alteracoes a LEFT JOIN entidades e USING (chave_unica) ORDER BY a.id DESC LIMIT ?"
+    )
+    with get_conn() as conn:
+        return pd.read_sql_query(sql, conn, params=(limite,))
+
+
+# ----------------------------------------------------------------------------
+# Leitura para a interface
+# ----------------------------------------------------------------------------
+def load_entidades_df() -> pd.DataFrame:
+    """Todas as entidades + dados comerciais (leads), prontas para análise."""
+    sql = (
+        "SELECT e.*, l.status AS status_comercial, l.owner, l.linkedin, l.contato_extra, "
+        "l.observacoes, l.atualizado_em AS lead_atualizado_em "
+        "FROM entidades e LEFT JOIN leads l USING (chave_unica)"
+    )
+    with get_conn() as conn:
+        return pd.read_sql_query(sql, conn)
+
+
+def get_data_version() -> tuple:
+    """Muda sempre que há nova carga ou edição comercial (invalida o cache da UI)."""
+    with get_conn() as conn:
+        carga = conn.execute("SELECT COALESCE(MAX(id), 0) FROM cargas").fetchone()[0]
+        lead = conn.execute("SELECT COALESCE(MAX(atualizado_em), '') FROM leads").fetchone()[0]
+    return (carga, lead)
+
+
+# ----------------------------------------------------------------------------
+# Dados comerciais (internos)
+# ----------------------------------------------------------------------------
+def save_lead(chave_unica: str, status: str | None, owner: str | None = None,
+              linkedin: str | None = None, contato_extra: str | None = None,
+              observacoes: str | None = None) -> None:
+    agora = datetime.now().isoformat(timespec="seconds")
+    with get_conn() as conn:
+        conn.execute(
+            "INSERT INTO leads (chave_unica, status, owner, linkedin, contato_extra, observacoes, atualizado_em) "
+            "VALUES (?,?,?,?,?,?,?) ON CONFLICT(chave_unica) DO UPDATE SET status=excluded.status, "
+            "owner=excluded.owner, linkedin=excluded.linkedin, contato_extra=excluded.contato_extra, "
+            "observacoes=excluded.observacoes, atualizado_em=excluded.atualizado_em",
+            (chave_unica, status or None, owner or None, linkedin or None, contato_extra or None,
+             observacoes or None, agora),
+        )
+
+
+def save_leads_status(chaves: list[str], status: str) -> None:
+    """Define o status de várias entidades de uma vez, sem apagar as demais anotações."""
+    agora = datetime.now().isoformat(timespec="seconds")
+    with get_conn() as conn:
+        conn.executemany(
+            "INSERT INTO leads (chave_unica, status, atualizado_em) VALUES (?,?,?) "
+            "ON CONFLICT(chave_unica) DO UPDATE SET status=excluded.status, atualizado_em=excluded.atualizado_em",
+            [(c, status, agora) for c in chaves],
+        )
