@@ -335,7 +335,7 @@ def _coletar(tipo: str) -> list[dict]:
 
         if spec["filtrar_gestor"]:
             df_pj = df_pj[df_pj["CATEG_REG"].str.contains(CATEG_GESTOR, na=False)]
-            df_pf = df_pf[df_pf["CATEG_REG"].str.contains(CATEG_GESTOR, na=False)]
+            df_pf = df_pf[(df_pf["CATEG_REG"].str.strip() == "") | df_pf["CATEG_REG"].str.contains(CATEG_GESTOR, na=False)]
 
         diretores = _mapa_por_cnpj(
             _ler_opcional(zip_path, f"{prefix}_diretor.csv", tmp, ["CNPJ", "DIRETOR"]), "DIRETOR")
